@@ -17,7 +17,7 @@ This is a "Hello XSUAA" application for the SAP Cloud Platform Cloud Foundry Env
 
 There are two versions for now. One will show a really simple application using Express to provide a simple REST API. Version two will use the SAP Approuter to redirect users to a login screen, if they are not logged-in yet.
 
-### Version 1
+### Version 2
 
 To get this application running, I use the Cloud Foundry CLI. When installed and connected to your subaccount and choosen the space, you need to __create an instance of the XSUAA Service__. To do this, one could also use the SCP Cockpit UI, but the best way is using a `xs-security.json` file to provide the necesary settings. If you just want to authenticate your users, go with the following basic content of the file. 
 ``` JSON
