@@ -41,6 +41,15 @@ npm install express passport @sap/xssec @sap/xsenv --save
 ```
 Especially important is the __manifest.yml__ file. This will contain some options for CF. There you bind your xsuaa service to your application. So make sure, that the naming of the service is constant, as for the example: 'cf-xsuaa-example'. __You need to change the name and host to a unique string__.
 
+The action happens in the `server.js` file with the following lines of code:
+```JAVASCRIPT
+const services = xsenv.getServices({ uaa: 'cf-xsuaa-example' });
+passport.use(new JWTStrategy(services.uaa));
+app.use(passport.initialize());
+app.use(passport.authenticate('JWT', { session: false }));
+```
+This will add the middleware that checks if a authorization header is present and if not gives a Error before the user can access the routes.
+
 You can deploy this example to your space using `cf push` and take a look in the logs of the application with `cf logs cf-node-xsuaa-v1 --recent`.
 There you can obtain the parsed JWT Token, when you request the `/auth-info` endpoint with the access token. For now you will just get a `401 Unauthorized` Error.
 
@@ -48,7 +57,7 @@ There you can obtain the parsed JWT Token, when you request the `/auth-info` end
 
 To access this API we are going to query the UAA Endpoint and provide credentials to retrieve a access token. There are different approches to get access to a UAA secured API, you can find more Information about that on [Cloud Foundry documentation](https://docs.cloudfoundry.org/api/uaa/).
 
-Informations about the XSUAA Service Endpoint are displayed in the SCP Cockpit `Trial Home / your trial account / subaccount / space / Authorization & Trust Management / cf-xsuaa-example` or just check out the env variables of your application with the CLI command `cf env cf-node-xsuaa-v1` with respect to your unique application name - referenced in the manifest.yml file. This sample JSON shows the VCAP_SERVICES Object with my (censored) credentials. We need these to get the token.
+Informations about the XSUAA Service Endpoint are displayed in the SCP Cockpit `Trial Home / your trial account / subaccount / space / Authorization & Trust Management / cf-xsuaa-example` or just check out the env variables of your application with the CLI command `cf env cf-node-xsuaa-v1` with respect to your unique application name - referenced in the manifest.yml file. This sample JSON shows the VCAP_SERVICES Object with the xsuaa service and my (censored) credentials. We need the following information to get the token.
 
 ```YAML
 {
@@ -77,6 +86,7 @@ grant_type=password
 &client_id=*your client id*
 &client_secret=*your client secret*
 ```
+Username and Password for your Identity Provider like the standard SCP User and the clientId and clientSecret from above.
 And the Result should look like this:
 
 ```YAML
