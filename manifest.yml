@@ -1,0 +1,9 @@
+---
+applications:
+- name: cf-node-xsuaa-v1
+  host: cf-node-xsuaa-v1
+  path: /
+  buildpack: nodejs_buildpack
+  memory: 128M
+  services:
+  - cf-xsuaa-example
