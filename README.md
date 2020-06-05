@@ -29,7 +29,7 @@ To get this application running, I use the Cloud Foundry CLI. When installed and
 
 To create the XSUAA Service use:
 ```
-cf create service xsuaa application cf-xsuaa-example -c xs-security.json
+cf create-service xsuaa application cf-xsuaa-example -c xs-security.json
 ```
 This will create a XSUAA Service with the application plan, named cf-xsuaa-example using the settings from the file.
 
