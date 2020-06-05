@@ -7,3 +7,18 @@ applications:
   memory: 128M
   services:
   - cf-xsuaa-example
+- name: cf-node-xsuaa-v1-router
+  host: cf-node-xsuaa-v1-router
+  path: approuter
+  buildpack: nodejs_buildpack
+  memory: 128M  
+  env:
+    destinations: >
+      [
+        {"name":"api-destination",
+         "url":"https://cf-node-xsuaa-v1.cfapps.eu10.hana.ondemand.com",
+         "forwardAuthToken": true}
+      ]  
+  services:
+  - cf-xsuaa-example
+

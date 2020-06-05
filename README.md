@@ -37,11 +37,18 @@ This will create a XSUAA Service with the application plan, named cf-xsuaa-examp
 Get your project ready with the following dependencies:
 ```
 npm init
-npm install express passport @sap/xssec @sap/xsenv --save
+npm install express passport @sap/xssec @sap/xsenv @sap/approuter --save
 ```
-Especially important is the __manifest.yml__ file. This will contain some options for CF. There you bind your xsuaa service to your application. So make sure, that the naming of the service is constant, as for the example: 'cf-xsuaa-example'. __You need to change the name and host to a unique string__.
+Especially important is the __manifest.yml__ file. This will contain some options for CF. There you bind your xsuaa service to your application. So make sure, that the naming of the service is constant, as for the example: 'cf-xsuaa-example'. __You need to change the name and host to a unique string__. In comparison to version 1, we add another application in the manifest.yml - the approuter. Therefore we reference the path `/approuter` in which we have a `package.json` an the configuration file for the approuter `xs-app.json`.
+For this version the start command in the package.json of the approuter folder has to point to the SAP Approuter node module. What this does is, it will handle the login and forward the user through the specified route to the main application, including the generated JWT token.
 
-The action happens in the `server.js` file with the following lines of code:
+```YAML
+  "scripts": {
+    "start": "node node_modules/@sap/approuter/approuter.js"
+  }
+```
+
+The authentication action happens in the `server.js` file with the following lines of code:
 ```JAVASCRIPT
 const services = xsenv.getServices({ uaa: 'cf-xsuaa-example' });
 passport.use(new JWTStrategy(services.uaa));
@@ -51,65 +58,12 @@ app.use(passport.authenticate('JWT', { session: false }));
 This will add the middleware that checks if a authorization header is present and if not gives a Error before the user can access the routes.
 
 You can deploy this example to your space using `cf push` and take a look in the logs of the application with `cf logs cf-node-xsuaa-v1 --recent`.
-There you can obtain the parsed JWT Token, when you request the `/auth-info` endpoint with the access token. For now you will just get a `401 Unauthorized` Error.
 
-### Retrieve Access Token From XSUAA Service
+### Query REST API
 
-To access this API we are going to query the UAA Endpoint and provide credentials to retrieve a access token. There are different approches to get access to a UAA secured API, you can find more Information about that on [Cloud Foundry documentation](https://docs.cloudfoundry.org/api/uaa/).
+Finally we can request our API through a browser. A login screen will load and we can put our Cloud Platform credentials in. This will redirect to our application through the specified route with the needed authorization headers.
 
-Informations about the XSUAA Service Endpoint are displayed in the SCP Cockpit `Trial Home / your trial account / subaccount / space / Authorization & Trust Management / cf-xsuaa-example` or just check out the env variables of your application with the CLI command `cf env cf-node-xsuaa-v1` with respect to your unique application name - referenced in the manifest.yml file. This sample JSON shows the VCAP_SERVICES Object with the xsuaa service and my (censored) credentials. We need the following information to get the token.
-
-```YAML
-{
- "VCAP_SERVICES": {
-  "xsuaa": [ {
-    "credentials": {
-     "clientid": "sb-cf-xsuaa-example!t48462",
-     "clientsecret": "/tiJcensored*iGI=",
-     "url": "https://2censored*trial.authentication.eu10.hana.ondemand.com",
-     .....
-    } } ] }
-}
-```
-
-The Endpoint we are going to request is `https://2censored*trial.authentication.eu10.hana.ondemand.com/oauth/token`, so the url field in credentials attached __/oauth/token__. Due to the fact, that we are using the standard SAP identity provider, we just need the username and the password of the Cloud Platform account to retrieve the token with the request below:
-
-```HTTP
-###
-POST https://2censored*trial.authentication.eu10.hana.ondemand.com/oauth/token HTTP/1.1
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=password
-&username=*your username, in scp trial your email*
-&password=*your user password*
-&scope=
-&client_id=*your client id*
-&client_secret=*your client secret*
-```
-Username and Password for your Identity Provider like the standard SCP User and the clientId and clientSecret from above.
-And the Result should look like this:
-
-```YAML
-{
-  "access_token": "ey.... your token",
-  "token_type": "bearer",
-  "id_token": "ey.... your token",
-  "refresh_token": "your refresh token",
-  "expires_in": 43199,
-  "scope": "openid",
-  "jti": "your jti"
-}
-```
-In the repo I also provide a Postman request, which contains this example. I recommend REST Client for VS Code to run the requests.
-
-### Query REST API with Authorization Header
-
-Finally we can put the token in the Authorization header of our request. The request will look as follows:
-```HTTP
-GET https://host:port/auth-info HTTP/1.1
-Authorization: Bearer eytluvzifeor3984pgh3rg3rü9rhvöutrdz <- your token (expires after 12 hours)
-```
-Now you should be able to check out the content of the jwt token in the application log. The user is therefore authenticated.
+Now you should be able to check out the content of the JWT token in the application log. The user is therefore authenticated.
 As an application developer you can see who is your user and which roles he is assigned to, for instance "Subaccount Administrator". This information can be used to do some advanced authorization checks.
 
 To build up on that, I will provide a stage 2 of this example with access restrictions, roles and will touch on a basic example how to use App Router and the xs-apps.json file to set all of this up. If you do not want to use tokens, because you provide a UI or something, check out Version 2.
