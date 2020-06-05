@@ -1,4 +1,31 @@
 {
     "xsappname": "cf-xsuaa-example",
-    "tenant-mode": "dedicated"
+    "tenant-mode": "dedicated",
+    "scopes": [
+        {
+            "name": "$XSAPPNAME.DisplayInformation",
+            "description": "Look at Information"
+        },
+        {
+            "name": "$XSAPPNAME.ChangeInformation",
+            "description": "Alter Information"
+        }
+    ],
+    "role-templates": [
+        {
+            "name": "NormalUser",
+            "description": "Read Access",
+            "scope-references": [
+                "$XSAPPNAME.DisplayInformation"
+            ]
+        },
+        {
+            "name": "Admin",
+            "description": "Allowed to to anything",
+            "scope-references": [
+                "$XSAPPNAME.DisplayInformation",
+                "$XSAPPNAME.ChangeInformation"
+            ]
+        }
+    ]
 }

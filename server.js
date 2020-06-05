@@ -20,9 +20,46 @@ app.get("/", function (req, res) {
 
 app.get("/auth-info", function (req, res) {
     //this endpoint demonstrates that you can retrieve the login information of the current user
+    //check this out to see which scopes are assigned to your user
     const token = parseJwtToken(req.headers.authorization);
     console.log(token)
+    console.log(req.authInfo)
     res.send("works");
+});
+
+//normal users are allowed to "get"
+app.get("/access-restricted", function (req, res) {
+    if (!req.authInfo.checkLocalScope('DisplayInformation')) {
+        console.log('Missing the expected scope');
+        return res.status(403).send('Forbidden');
+    }
+    res.send("get works");
+});
+
+//admin area
+app.put("/access-restricted", function (req, res) {
+    if (!req.authInfo.checkLocalScope('ChangeInformation')) {
+        console.log('Missing the expected scope');
+        return res.status(403).send('Forbidden');
+    }
+    res.send("put works");
+});
+
+app.post("/access-restricted", function (req, res) {
+    if (!req.authInfo.checkLocalScope('ChangeInformation')) {
+        console.log('Missing the expected scope');
+        return res.status(403).send('Forbidden');
+    }
+    res.send("post works");
+});
+
+
+app.delete("/access-restricted", function (req, res) {
+    if (!req.authInfo.checkLocalScope('cf-xsuaa-example!t48462.ChangeInformation')) {
+        console.log('Missing the expected scope');
+        return res.status(403).end('Forbidden');
+    }
+    res.send("delete works");
 });
 
 
