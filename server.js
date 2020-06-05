@@ -23,7 +23,6 @@ app.get("/auth-info", function (req, res) {
     //check this out to see which scopes are assigned to your user
     const token = parseJwtToken(req.headers.authorization);
     console.log(token)
-    console.log(req.authInfo)
     res.send("works");
 });
 
