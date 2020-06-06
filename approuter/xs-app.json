@@ -1,8 +1,23 @@
 {
     "routes": [
         {
+            "source": "^/admin/(.*)$",
+            "destination": "api-destination",
+            "scope": {
+                "GET": [
+                    "$XSAPPNAME.ChangeInformation"
+                ]
+            }
+        },
+        {
             "source": "^/(.*)$",
-            "destination": "api-destination"
+            "destination": "api-destination",
+            "scope": {
+                "GET": [
+                    "$XSAPPNAME.DisplayInformation",
+                    "$XSAPPNAME.ChangeInformation"
+                ]
+            }
         }
     ]
 }
